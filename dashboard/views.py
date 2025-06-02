@@ -4,14 +4,14 @@ from django.contrib import messages
 from django.views import generic
 from youtubesearchpython import VideosSearch
 import requests
-from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 import wikipedia
 
 
 def home(request):
     return render(request, 'dashboard/home.html')
 
-
+@login_required
 def notes(request):
     if request.method =='POST':
        form = NoteForm(request.POST)
@@ -27,13 +27,15 @@ def notes(request):
     context = {"notes": notes ,"form":form }
     return render(request, 'dashboard/notes.html', context)
 
+@login_required
 def delete_note(request,pk=None):
     Note.objects.get(id=pk).delete()
     return redirect('notes')
 
 class NoteDetailView(generic.DetailView):
     model= Note
-    
+ 
+@login_required   
 def homework(request):
     if request.method =='POST':
        home_form = HomeForm(request.POST)
@@ -67,6 +69,7 @@ def homework(request):
     # print(context)
     return render(request, 'dashboard/homework.html', context)
 
+@login_required
 def update_homework(request,pk= None):
     work = Homework.objects.get(id = pk)
     if work.Is_finished ==True:
@@ -75,7 +78,8 @@ def update_homework(request,pk= None):
      work.Is_finished =True
      work.save()
     return redirect('home-work')
-    
+
+@login_required    
 def delete_work(request,pk=None):
     Homework.objects.get(id = pk).delete()
     return redirect('home-work')  
@@ -114,7 +118,7 @@ def youtube(request):
     context={'form':form}
     return render(request,'dashboard/youtube.html',context)  
 
-
+@login_required
 def todo(request):
     if request.method =='POST':
        form= TodoForm(request.POST)
@@ -145,11 +149,13 @@ def todo(request):
     context={'todos':todo , 'form':form, 'todos_done':todo_done}
     return render(request,'dashboard/todo.html',context)
 
+@login_required
 def delete_todo(request,pk=None):
     Todo.objects.get(id = pk).delete()
     messages.success(request,f"Todo deleted from {request.user.username} !!")
     return redirect('todo')
 
+@login_required
 def update_todo(request,pk= None):
     todo = Todo.objects.get(id = pk)
     if todo.Is_finished ==True:
@@ -175,7 +181,7 @@ def Books(request):
                 'count': answer['items'][i]['volumeInfo'].get('pageCount'),
                 'categories': answer['items'][i]['volumeInfo'].get('categories'),
                 'rating': answer['items'][i]['volumeInfo'].get('pageRating'),
-                'thumbnail': answer['items'][i]['volumeInfo'].get('imageLinks').get('thumbnail'),
+                'thumbnail': answer['items'][i]['volumeInfo'].get('imageLinks'),
                 'preview': answer['items'][i]['volumeInfo'].get('previewLink'),
             }
             result_list.append(result_dict)
@@ -240,7 +246,7 @@ def wiki(request):
      context= {'form':form}
     return render(request,'dashboard/wiki.html',context)
 
-
+@login_required
 def Conversion(request):
     if request.method == 'POST':
         form = ConversionForm(request.POST)
@@ -354,7 +360,7 @@ def register(request):
     context = {'form':form}
     return render(request,'dashboard/register.html',context)
 
-
+@login_required
 def profile(request):
     work = Homework.objects.filter(Is_finished=False, user=request.user)
     todo = Todo.objects.filter(Is_finished=False, user=request.user)

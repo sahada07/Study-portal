@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b3pd+4^y^oji1wsu2rqsjy6)w(%8y@!p7e50aew60yzkv49sie'
+# SECRET_KEY = 'django-insecure-b3pd+4^y^oji1wsu2rqsjy6)w(%8y@!p7e50aew60yzkv49sie'
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'unsafe-development-key')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'student-portal-4plj.onrender.com']
 
 
 # Application definition
@@ -129,6 +134,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = '/static/'
 STATICFILES_DIRS=[BASE_DIR/"static"]
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # For production use
+
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login' 
 
@@ -137,3 +144,8 @@ LOGIN_URL = 'login'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+
+# Enable WhiteNoise (optional but useful)
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
