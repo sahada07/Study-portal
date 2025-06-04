@@ -26,6 +26,7 @@ urlpatterns = [
     path('dictionary',views.dictionary,name='dictionary'),
     path('wiki',views.wiki,name='wiki'),
     path('convert',views.Conversion,name='convert'),
+     path('register/',views.register,name='register'),
     # path('logout',views.logout, name='logout'),
 ] 
 
