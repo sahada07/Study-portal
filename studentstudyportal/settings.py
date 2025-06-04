@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
 # DEBUG = True
 
 DEBUG = os.environ.get('DEBUG', '') != 'False'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','student-portal-4plj.onrender.com']
 
 
 # Application definition
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,9 +131,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS=[BASE_DIR/"static"]
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 LOGIN_REDIRECT_URL = 'home'
 LOGIN_URL = 'login' 
@@ -143,11 +141,10 @@ LOGIN_URL = 'login'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']  # for local development
+STATIC_ROOT = BASE_DIR / 'staticfiles'    # for deployment
 
-# SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
-# DEBUG = os.environ.get('DEBUG', '') != 'False'
-# ALLOWED_HOSTS = ['.onrender.com']
-
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
