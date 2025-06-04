@@ -28,8 +28,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
 # DEBUG = True
 
 DEBUG = os.environ.get('DEBUG', '') != 'False'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','student-portal-4plj.onrender.com']
-
+ALLOWED_HOSTS = ['student-portal-8.onrender.com']
 
 # Application definition
 
