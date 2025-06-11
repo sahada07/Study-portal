@@ -22,7 +22,7 @@ urlpatterns = [
     path('wiki',views.wiki,name='wiki'),
     path('convert',views.Conversion,name='convert'),
     path('register',views.register,name='register'),
-    path('create-superuser/', views.create_superuser,name='super'),
+    
 
     
 ] 
