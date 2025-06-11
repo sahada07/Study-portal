@@ -1,11 +1,5 @@
-from django.http import HttpResponse
 from django.urls import path
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
-
-from django.contrib.auth import views as auth_views
-
 
 
 urlpatterns = [
@@ -32,14 +26,7 @@ urlpatterns = [
 
     
 ] 
-from django.contrib.auth.models import User
 
-def create_superuser(request):
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', 'admin123')
-        return HttpResponse("Superuser created. You can now log in with username: admin and password: admin123")
-    else:
-        return HttpResponse("Superuser already exists.")
 
 # if settings.DEBUG:
 #     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

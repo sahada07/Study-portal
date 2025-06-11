@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from . forms import *
 from django.contrib import messages
@@ -375,6 +376,9 @@ def profile(request):
       todo_done = False
     context = {'works': work, 'todos':todo, 'work_done':work_done, 'todo_done':todo_done}
     return render(request,'dashboard/profile.html',context) 
+
+from django.contrib.auth.models import User
+
 
 # def logout(request):
 #     if request.method == 'POST':
