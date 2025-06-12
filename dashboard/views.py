@@ -7,6 +7,7 @@ from youtubesearchpython import VideosSearch
 import requests
 from django.contrib.auth.decorators import login_required
 import wikipedia
+from .forms import UserRegistrationForm
 
 
 def home(request):
@@ -377,7 +378,6 @@ def profile(request):
     context = {'works': work, 'todos':todo, 'work_done':work_done, 'todo_done':todo_done}
     return render(request,'dashboard/profile.html',context) 
 
-from django.contrib.auth.models import User
 
 
 # def logout(request):
