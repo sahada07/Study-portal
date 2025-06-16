@@ -194,41 +194,139 @@ def Books(request):
         context = {'form': form}
         return render(request, 'dashboard/books.html', context)
 
+# def dictionary(request):
+#     if request.method == 'POST':
+#         form = DashboardForm(request.POST)
+#         text = request.POST['text']
+#         url = f"https://api.dictionaryapi.dev/api/v2/entries/en_US/{text}"
+#         r = requests.get(url)
+#         answer = r.json()
+        
+#         try:
+#             phonetics= answer[0]['phonetics'][0]['text']
+#             audio= answer[0]['phonetics'][0]['audio']
+#             # print('audio',audio)
+#             definition= answer[0]['meanings'][0]['definitions'][0]
+#             examples= answer[0]['meanings'][0]['definitions'][0]['example']
+#             synonyms= answer[0]['meanings'][0]['definitions'][0]['synonyms']
+#             context={
+#                 'form':form,
+#                 'input':text,
+#                 'phonetics':phonetics,
+#                 'audio':audio,
+#                 'definition':definition,
+#                 'examples':examples,
+#                 'synonyms':synonyms
+                
+#             }
+#         except:
+#             context={
+#                 'form':form,
+#                 'input':'',
+#                 }
+#         return render(request,'dashboard/dictionary.html',context)
+#     else:
+#        form = DashboardForm()
+#        context = {'form':form}
+#     return render(request,'dashboard/dictionary.html',context)
+
+
 def dictionary(request):
+    form = DashboardForm()
+    context = {'form': form}
+
     if request.method == 'POST':
         form = DashboardForm(request.POST)
-        text = request.POST['text']
-        url = f"https://api.dictionaryapi.dev/api/v2/entries/en_US/{text}"
-        r = requests.get(url)
-        answer = r.json()
-        
-        try:
-            phonetics= answer[0]['phonetics'][0]['text']
-            audio= answer[0]['phonetics'][0]['audio']
-            # print('audio',audio)
-            definition= answer[0]['meanings'][0]['definitions'][0]
-            examples= answer[0]['meanings'][0]['definitions'][0]['example']
-            synonyms= answer[0]['meanings'][0]['definitions'][0]['synonyms']
-            context={
-                'form':form,
-                'input':text,
-                'phonetics':phonetics,
-                'audio':audio,
-                'definition':definition,
-                'examples':examples,
-                'synonyms':synonyms
-                
-            }
-        except:
-            context={
-                'form':form,
-                'input':'',
-                }
-        return render(request,'dashboard/dictionary.html',context)
-    else:
-       form = DashboardForm()
-       context = {'form':form}
-    return render(request,'dashboard/dictionary.html',context)
+        text = request.POST.get('text', '').strip().lower()
+
+        if text:
+            url = f"https://api.dictionaryapi.dev/api/v2/entries/en_US/{text}"
+            r = requests.get(url)
+
+            if r.status_code == 200:
+                try:
+                    answer = r.json()
+                    word_data = answer[0]
+                    
+                    # Extract phonetics and audio
+                    phonetics = ''
+                    audio = ''
+                    if 'phonetics' in word_data and word_data['phonetics']:
+                        for phonetic in word_data['phonetics']:
+                            if phonetic.get('text'):
+                                phonetics = phonetic['text']
+                                break
+                        for phonetic in word_data['phonetics']:
+                            if phonetic.get('audio'):
+                                audio = phonetic['audio']
+                                break
+                    
+                    # Initialize collections for all meanings
+                    all_definitions = []
+                    all_examples = []
+                    all_synonyms = set()
+                    all_antonyms = set()
+                    
+                    # Extract from all meanings and definitions
+                    if 'meanings' in word_data:
+                        for meaning in word_data['meanings']:
+                            if 'definitions' in meaning:
+                                for definition_obj in meaning['definitions']:
+                                    # Collect definitions
+                                    if definition_obj.get('definition'):
+                                        all_definitions.append(definition_obj['definition'])
+                                    
+                                    # Collect examples
+                                    if definition_obj.get('example'):
+                                        all_examples.append(definition_obj['example'])
+                                    
+                                    # Collect synonyms
+                                    if definition_obj.get('synonyms'):
+                                        all_synonyms.update(definition_obj['synonyms'])
+                                    
+                                    # Collect antonyms
+                                    if definition_obj.get('antonyms'):
+                                        all_antonyms.update(definition_obj['antonyms'])
+                            
+                            # Also check for synonyms/antonyms at meaning level
+                            if meaning.get('synonyms'):
+                                all_synonyms.update(meaning['synonyms'])
+                            if meaning.get('antonyms'):
+                                all_antonyms.update(meaning['antonyms'])
+                    
+                    # Prepare final data
+                    primary_definition = all_definitions[0] if all_definitions else 'Definition not available.'
+                    
+                    # If no examples found, create a generic one
+                    if not all_examples:
+                        all_examples = [f"Please use '{text}' in a sentence."]
+                    
+                    # Convert sets to lists and limit to reasonable numbers
+                    synonyms_list = list(all_synonyms)[:10]  # Limit to 10 synonyms
+                    antonyms_list = list(all_antonyms)[:10]  # Limit to 10 antonyms
+                    
+                    # If no synonyms/antonyms found, you could optionally add fallback logic here
+                    # or use a secondary API like WordsAPI or Merriam-Webster
+                    
+                    context.update({
+                        'input': text,
+                        'phonetics': phonetics,
+                        'audio': audio,
+                        'definition': primary_definition,
+                        'examples': all_examples[0],  # Show first example
+                        'all_examples': all_examples,  # In case you want to show multiple
+                        'synonyms': synonyms_list,
+                        'antonyms': antonyms_list,
+                    })
+                    
+                except (KeyError, IndexError, TypeError) as e:
+                    context['error'] = f"Could not parse dictionary response: {str(e)}"
+            else:
+                context['error'] = "Word not found or API limit exceeded."
+        else:
+            context['error'] = "Please enter a word to search."
+
+        return render(request, 'dashboard/dictionary.html', context)
 
 def wiki(request):
     if request.method =="POST":

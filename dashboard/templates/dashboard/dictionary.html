@@ -1,4 +1,111 @@
-{% extends 'dashboard/base.html' %} 
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<section class='text-center container'>
+    <h2>Student Dictionary</h2>
+    <p>Enter any word to get the phonetics, definition, and an example.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input class="btn btn-danger" type="submit" value="Submit">
+    </form>
+
+    <br>
+
+    {% if input %}
+        <div class="content-section p-0 mt-5">
+            <div class="custom-header">
+                <h2>{{ input|title }}</h2>
+                {% if phonetics %}<h6>{{ phonetics }}</h6>{% endif %}
+
+                {% if audio %}
+                    <audio id="player" src="{{ audio }}"></audio>
+                    <div>
+                        <a onclick="document.getElementById('player').play()" style="cursor: pointer;">
+                            <i class='fa fa-volume-up fa-2x'></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <hr class="p-0 m-0">
+
+            <section class="text-center container">
+                <h4><strong>Definition:</strong> {{ definition }}</h4>
+                
+                {% if examples %}
+                    <h5><strong>Example:</strong> <em>"{{ examples }}"</em></h5>
+                {% else %}
+                    <h5><strong>Example:</strong> <em>No example available for this word.</em></h5>
+                {% endif %}
+
+            {% if synonyms %}
+        <div class="mt-3 p-3 bg-white rounded shadow-sm border">
+           <h5 ><strong>Synonyms:</strong></h5>
+            <div class="d-flex flex-wrap">
+            {% for synonym in synonyms %}
+            <span class="badge bg-primary text-white mr-2 mb-2 px-3 py-2" style="font-size: 0.9rem; border-radius: 20px;">{{ synonym }}</span>
+         {% endfor %}
+    </div>
+</div>
+                    {% comment %} <div class="mt-3">
+                        <h5><strong>Synonyms:</strong></h5>
+                        <p class="text-info">
+                            {% for synonym in synonyms %}
+                                <span class="badge badge-info mr-1">{{ synonym }}</span>
+                            {% endfor %}
+                        </p>
+                    </div> {% endcomment %}
+                {% else %}
+                    <div class="mt-3">
+                        <h5><strong>Synonyms:</strong></h5>
+                        <p class="text-muted"><em>No synonyms found for this word.</em></p>
+                    </div>
+                {% endif %}
+
+                {% if antonyms %}
+                    <div class="mt-3 p-3 bg-white rounded shadow-sm border">
+                        <h5><strong>Antonyms:</strong></h5>
+                        <p class="d-flex flex-wrap">
+                            {% for antonym in antonyms %}
+                                <span class="badge badge-warning mr-2 mb-2 px-3 py-2"  style="font-size: 0.9rem; border-radius: 20px;">{{ antonym }}</span>
+                            {% endfor %}
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="mt-3">
+                        <h5><strong>Antonyms:</strong></h5>
+                        <p class="text-muted"><em>No antonyms found for this word.</em></p>
+                    </div>
+                {% endif %}
+
+                <!-- Optional: Show additional examples if available -->
+                {% if all_examples and all_examples|length > 1 %}
+                    <div class="mt-3">
+                        <h5><strong>More Examples:</strong></h5>
+                        <ul>
+                            {% for example in all_examples|slice:"1:" %}
+                                <li><em>"{{ example }}"</em></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                </section>
+        </div>
+
+    {% elif error %}
+        <div class="alert alert-danger mt-4">
+            <h4>{{ error }}</h4>
+        </div>
+    {% endif %}
+</section>
+
+{% endblock content %}
+
+
+{% comment %} {% extends 'dashboard/base.html' %} 
 {% load static %} 
 {% block content %}
 <section class='text-center container'>
@@ -39,4 +146,6 @@
     <h2>Sorry, API request limit exceeded</h2>
     {%endif%}
 </section>
-{% endblock content %}
+{% endblock content %} {% endcomment %}
+
+
