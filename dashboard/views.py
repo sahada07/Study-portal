@@ -326,7 +326,7 @@ def dictionary(request):
         else:
             context['error'] = "Please enter a word to search."
 
-        return render(request, 'dashboard/dictionary.html', context)
+    return render(request, 'dashboard/dictionary.html', context)
 
 def wiki(request):
     if request.method =="POST":
@@ -452,7 +452,8 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request,f"Welcome {username}Account Created for you Successfully!!")
+            messages.success(request,f"Welcome {username} Account Created for you Successfully!!")
+            print(username)
         return redirect('login') 
         
     else:   
