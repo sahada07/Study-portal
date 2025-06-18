@@ -177,7 +177,7 @@ def Books(request):
         result_list = []
         for i in range(10):
             result_dict = {
-                'title': answer['items'][i]['volumeInfo']['title'],
+            'title': answer['items'][i]['volumeInfo']['title'],
                 'subtitle': answer['items'][i]['volumeInfo'].get('subtitle'),
                 'description': answer['items'][i]['volumeInfo'].get('description'),
                 'count': answer['items'][i]['volumeInfo'].get('pageCount'),
