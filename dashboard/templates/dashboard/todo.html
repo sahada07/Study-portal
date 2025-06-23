@@ -17,24 +17,28 @@
         <tbody>
             {% for todo in todos %}
             <tr>
-                
                 <th scope="row">{{forloop.counter}}</th>
                 <td>{{todo.title}}</td>
                 <td>
-                    <a href="{% url 'update-todo' todo.id%}">
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="todo_id" value="{{ todo.id }}">
                         <div class="form-check">
-                            {% if todo.Is_finished == True  %}
-                            <input class="form-check-input" type="checkbox" value="" checked >
-                            {% else %}
-                            <input class="form-check-input" type="checkbox" value="">
-                            {%endif%}
-                            <label class="form-check-label text-light" for="flexCheckDefault">
-                                Mark as Completed
-                            </label>
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   name="Is_finished"
+                                   {% if todo.Is_finished %}checked{% endif %}
+                                   onchange="this.form.submit()">
+                                        <label class="form-check-label text-light">
+                {% if todo.Is_finished %}
+                     Completed
+                {% else %}
+                    Mark as Completed
+                {% endif %}
+            </label>
                         </div>
-                    </a>
+                    </form>
                 </td>
-
                 <td><a href="{%url 'delete-todo' todo.id %}"><i class="fa fa-trash fa-2x"></i></a></td>
             </tr>
             {%endfor%}
@@ -42,10 +46,10 @@
     </table>
     {%else%}
     <h4>All tasks have been done!! create to add more</h4>
+    {%endif%}
 </div><br><br>
-{%endif%}
+
 <div class="container">
-    
     <form method="POST">
         {%csrf_token%}
         <fieldset class="form-group">

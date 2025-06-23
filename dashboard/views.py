@@ -32,58 +32,105 @@ def notes(request):
 @login_required
 def delete_note(request,pk=None):
     Note.objects.get(id=pk).delete()
+    messages.success(request,f"Note deleted from {request.user.username} !!")
     return redirect('notes')
 
 class NoteDetailView(generic.DetailView):
     model= Note
  
 @login_required   
-def homework(request):
-    if request.method =='POST':
-       home_form = HomeForm(request.POST)
-       if home_form.is_valid():
-           try:
-            finish = request.POST['Is_finished']
-            if finish == 'on':
-                finish =True
-            else:
-                finish = False
-           except:
-               finish = False
+# def homework(request):
+#     if request.method =='POST':
+#        home_form = HomeForm(request.POST)
+#        if home_form.is_valid():
+#            try:
+#             finish = request.POST['Is_finished']
+#             if finish == 'on':
+#                 finish =True
+#             else:
+#                 finish = False
+#            except:
+#                finish = False
                
-       works = Homework(user= request.user, title=request.POST['title'],
-                     subject= request.POST['subject'],
-                        description= request.POST['description'],
-                        due= request.POST['due'],
-                        Is_finished= finish) 
-       works.save()
-       messages.success(request,f"Homework added from {request.user.username} sucessfully")
+#        works = Homework(user= request.user, title=request.POST['title'],
+#                      subject= request.POST['subject'],
+#                         description= request.POST['description'],
+#                         due= request.POST['due'],
+#                         Is_finished= finish) 
+#        works.save()
+#        messages.success(request,f"Homework added from {request.user.username} sucessfully")
     
+#     form = HomeForm()
+#     work = Homework.objects.filter(user=request.user)
+#     if len(work)== 0:
+#         work_done=True
+        
+#     else:
+#      work_done= False 
+      
+#     context = {"works": work ,"works_done": work_done , 'form':form }
+#     # print(context)
+#     return render(request, 'dashboard/homework.html', context)
+def homework(request):
+    if request.method == 'POST':
+        # Check if this is an update request for existing homework
+        if 'homework_id' in request.POST:
+            # Handle updating existing homework completion status
+            homework_id = request.POST['homework_id']
+            try:
+                homework_item = Homework.objects.get(id=homework_id, user=request.user)
+                # Check if checkbox was checked (will be 'on') or unchecked (won't exist in POST)
+                homework_item.Is_finished = 'Is_finished' in request.POST
+                homework_item.save()
+                
+                status = "completed" if homework_item.Is_finished else "marked as incomplete"
+                messages.success(request, f"Homework '{homework_item.title}' {status}")
+            except Homework.DoesNotExist:
+                messages.error(request, "Homework not found")
+        
+        else:
+            # Handle creating new homework
+            home_form = HomeForm(request.POST)
+            if home_form.is_valid():
+                try:
+                    finish = request.POST.get('Is_finished', False)
+                    if finish == 'on':
+                        finish = True
+                    else:
+                        finish = False
+                except:
+                    finish = False
+                
+                works = Homework(
+                    user=request.user, 
+                    title=request.POST['title'],
+                    subject=request.POST['subject'],
+                    description=request.POST['description'],
+                    due=request.POST['due'],
+                    Is_finished=finish
+                )
+                works.save()
+                messages.success(request, f"Homework added from {request.user.username} successfully")
+    
+    # Always render the page with current data
     form = HomeForm()
     work = Homework.objects.filter(user=request.user)
-    if len(work)== 0:
-        work_done=True
-        
-    else:
-     work_done= False 
-      
-    context = {"works": work ,"works_done": work_done , 'form':form }
-    # print(context)
+    work_done = len(work) == 0
+    
+    context = {"works": work, "works_done": work_done, 'form': form}
     return render(request, 'dashboard/homework.html', context)
 
 @login_required
-def update_homework(request,pk= None):
-    work = Homework.objects.get(id = pk)
-    if work.Is_finished ==True:
-       work.Is_finished = False
-    else:
-     work.Is_finished =True
-     work.save()
+def update_homework(request, pk=None):
+    work = Homework.objects.get(id=pk)
+    work.Is_finished = not work.Is_finished  # Toggle the boolean value
+    work.save()
     return redirect('home-work')
 
 @login_required    
 def delete_work(request,pk=None):
     Homework.objects.get(id = pk).delete()
+    messages.success(request,f"Homework deleted from {request.user.username} !!")
     return redirect('home-work')  
 
 def youtube(request):
@@ -121,35 +168,81 @@ def youtube(request):
     return render(request,'dashboard/youtube.html',context)  
 
 @login_required
-def todo(request):
-    if request.method =='POST':
-       form= TodoForm(request.POST)
-       if form.is_valid():
-           try:
-            finished = request.POST['Is_finished']
-            if finished == 'on':
-                finished =True
-            else:
-                finished = False
-           except:
-               finished = False
+# def todo(request):
+#     if request.method =='POST':
+#        form= TodoForm(request.POST)
+#        if form.is_valid():
+#            try:
+#             finished = request.POST['Is_finished']
+#             if finished == 'on':
+#                 finished =True
+#             else:
+#                 finished = False
+#            except:
+#                finished = False
              
-       todo = Todo(user=request.user, title=request.POST['title'],
-                    Is_finished =finished
+#        todo = Todo(user=request.user, title=request.POST['title'],
+#                     Is_finished =finished
 
-                        ) 
-       todo.save()
-       messages.success(request,f"Todo added from {request.user.username} sucessfully")
-    else:
-     form = TodoForm()
-    todo= Todo.objects.filter(user=request.user)
+#                         ) 
+#        todo.save()
+#        messages.success(request,f"Todo added from {request.user.username} sucessfully")
+#     else:
+#      form = TodoForm()
+#     todo= Todo.objects.filter(user=request.user)
     
-    if len(todo) == 0:
-        todo_done= True
-    else:
-        todo_done= False
-    context={'todos':todo , 'form':form, 'todos_done':todo_done}
-    return render(request,'dashboard/todo.html',context)
+#     if len(todo) == 0:
+#         todo_done= True
+#     else:
+#         todo_done= False
+#     context={'todos':todo , 'form':form, 'todos_done':todo_done}
+#     return render(request,'dashboard/todo.html',context)
+
+def todo(request):  # Replace with your actual function name
+    if request.method == 'POST':
+        # Check if this is an update request for existing todo
+        if 'todo_id' in request.POST:
+            # Handle updating existing todo completion status
+            todo_id = request.POST['todo_id']
+            try:
+                todo_item = Todo.objects.get(id=todo_id, user=request.user)
+                # Check if checkbox was checked (will be 'on') or unchecked (won't exist in POST)
+                todo_item.Is_finished = 'Is_finished' in request.POST
+                todo_item.save()
+                
+                status = "completed" if todo_item.Is_finished else "marked as incomplete"
+                messages.success(request, f"Todo '{todo_item.title}' {status}")
+            except Todo.DoesNotExist:
+                messages.error(request, "Todo not found")
+        
+        else:
+            # Handle creating new todo
+            form = TodoForm(request.POST)
+            if form.is_valid():
+                try:
+                    finished = request.POST.get('Is_finished', False)
+                    if finished == 'on':
+                        finished = True
+                    else:
+                        finished = False
+                except:
+                    finished = False
+                
+                todo = Todo(
+                    user=request.user, 
+                    title=request.POST['title'],
+                    Is_finished=finished
+                )
+                todo.save()
+                messages.success(request, f"Todo added for {request.user.username} successfully")
+    
+    # Always render the page with current data
+    form = TodoForm()
+    todo = Todo.objects.filter(user=request.user)
+    todo_done = len(todo) == 0
+    
+    context = {'todos': todo, 'form': form, 'todos_done': todo_done}
+    return render(request, 'dashboard/todo.html', context)
 
 @login_required
 def delete_todo(request,pk=None):
@@ -159,13 +252,17 @@ def delete_todo(request,pk=None):
 
 @login_required
 def update_todo(request,pk= None):
-    todo = Todo.objects.get(id = pk)
-    if todo.Is_finished ==True:
-       todo.Is_finished = False
-    else:
-     todo.Is_finished =True
-     todo.save()
+    todo = Todo.objects.get(id=pk)
+    todo.Is_finished = not todo.Is_finished  # Toggle the boolean value
+    todo.save()
     return redirect('todo')
+    # todo = Todo.objects.get(id = pk)
+    # if todo.Is_finished ==True:
+    #    todo.Is_finished = False
+    # else:
+    #  todo.Is_finished =True
+    #  todo.save()
+    # return redirect('todo')
     
 def Books(request):
     if request.method == 'POST':
