@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'studentstudyportal.wsgi.application'
 
 DATABASES = {
     'default': {
-'default': dj_database_url.parse(os.environ.get('postgresql://studentportaldb_user:BD80yvmlYEUiIDbOcmtLMiBrnWaq770j@dpg-d1dui7fgi27c73erbk50-a.oregon-postgres.render.com/studentportaldb', 'sqlite:///db.sqlite3'))
+      dj_database_url.parse(os.environ.get('postgresql://studentportaldb_user:BD80yvmlYEUiIDbOcmtLMiBrnWaq770j@dpg-d1dui7fgi27c73erbk50-a.oregon-postgres.render.com/studentportaldb', 'sqlite:///db.sqlite3'))
     }
 }
 
