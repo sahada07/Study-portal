@@ -22,6 +22,7 @@ urlpatterns = [
     path('wiki',views.wiki,name='wiki'),
     path('convert',views.Conversion,name='convert'),
     path('register',views.register,name='register'),
+    path('login/', views.CustomLoginView.as_view(), name='login'),
     
 
     

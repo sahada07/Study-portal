@@ -8,6 +8,8 @@ import requests
 from django.contrib.auth.decorators import login_required
 import wikipedia
 from .forms import UserRegistrationForm
+from django.contrib.auth.views import LoginView
+from django.contrib import messages
 
 
 def home(request):
@@ -557,6 +559,21 @@ def register(request):
      form = UserRegistrationForm()
     context = {'form':form}
     return render(request,'dashboard/register.html',context)
+
+
+
+class CustomLoginView(LoginView):
+    template_name = 'dashboard/login.html'
+    redirect_authenticated_user = True
+    
+    def form_valid(self, form):
+        messages.success(self.request, f"Welcome back, {form.get_user().username}!")
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password. Please try again.")
+        return super().form_invalid(form)
+
 
 @login_required
 def profile(request):
