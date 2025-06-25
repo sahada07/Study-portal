@@ -23,7 +23,7 @@ urlpatterns = [
     path('convert',views.Conversion,name='convert'),
     path('register',views.register,name='register'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
-    
+    path('run-migrations/', views.run_migrations, name='run_migrations'),
 
     
 ] 

@@ -599,4 +599,15 @@ def profile(request):
 #         messages.success(request,f" Logout {request.user.username} sucessfully")
 #     return render(request, 'dashboard/logout.html')
      
-        
+
+from django.core.management import call_command
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def run_migrations(request):
+    try:
+        call_command('migrate')
+        return HttpResponse("Migrations completed successfully!")
+    except Exception as e:
+        return HttpResponse(f"Migration failed: {str(e)}")       
