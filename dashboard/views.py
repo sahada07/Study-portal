@@ -137,37 +137,77 @@ def delete_work(request,pk=None):
 
 def youtube(request):
     if request.method == 'POST':
-        form=DashboardForm(request.POST)
+        form = DashboardForm(request.POST)
         text = request.POST['text']
         video = VideosSearch(text, limit=20)
-        result_list =[]
+        result_list = []
+        
         for i in video.result()['result']:
             result_dict = {
-            'input':text,
-            'title':i['title'],
-            'thumbnails':i['thumbnails'][0]['url'],
-            'channel':i['channel']['name'],
-            'link':i['link'],
-            'duration':i['duration'],
-            'views':i['viewCount']['short'],
-            'published':i['publishedTime'],
-
-
+                'input': text,
+                'title': i['title'],
+                'thumbnail': i['thumbnails'][0]['url'],  # Fixed: was 'thumbnails'
+                'channel': i['channel']['name'],
+                'link': i['link'],
+                'duration': i['duration'],
+                'views': i['viewCount']['short'],
+                'published': i['publishedTime'],
             }
+            
+            # Handle description
             desc = ''
             if i['descriptionSnippet']:
                 for j in i['descriptionSnippet']:
                     desc += j['text']
-                    result_dict['description']= desc
-                    result_list.append (result_dict)
-                    context={
-                        'form':form, 'results':result_list
-                    }
-                    return render(request,'dashboard/youtube.html',context)
-    else:   
-     form = DashboardForm()
-    context={'form':form}
-    return render(request,'dashboard/youtube.html',context)  
+            result_dict['description'] = desc
+            
+            # Add to result list
+            result_list.append(result_dict)
+        
+        # Return context with all results
+        context = {
+            'form': form, 
+            'results': result_list
+        }
+        return render(request, 'dashboard/youtube.html', context)
+    
+    else:
+        form = DashboardForm()
+        context = {'form': form}
+        return render(request, 'dashboard/youtube.html', context)
+    
+    # if request.method == 'POST':
+    #     form=DashboardForm(request.POST)
+    #     text = request.POST['text']
+    #     video = VideosSearch(text, limit=20)
+    #     result_list =[]
+    #     for i in video.result()['result']:
+    #         result_dict = {
+    #         'input':text,
+    #         'title':i['title'],
+    #         'thumbnails':i['thumbnails'][0]['url'],
+    #         'channel':i['channel']['name'],
+    #         'link':i['link'],
+    #         'duration':i['duration'],
+    #         'views':i['viewCount']['short'],
+    #         'published':i['publishedTime'],
+
+
+    #         }
+    #         desc = ''
+    #         if i['descriptionSnippet']:
+    #             for j in i['descriptionSnippet']:
+    #                 desc += j['text']
+    #                 result_dict['description']= desc
+    #                 result_list.append (result_dict)
+    #                 context={
+    #                     'form':form, 'results':result_list
+    #                 }
+    #                 return render(request,'dashboard/youtube.html',context)
+    # else:   
+    #  form = DashboardForm()
+    # context={'form':form}
+    # return render(request,'dashboard/youtube.html',context)  
 
 @login_required
 # def todo(request):
@@ -270,27 +310,62 @@ def Books(request):
     if request.method == 'POST':
         form = DashboardForm(request.POST)
         text = request.POST['text']
-        url = f"https://www.googleapis.com/books/v1/volumes?q={text}"
-        r = requests.get(url)
-        answer = r.json()
-        result_list = []
-        for i in range(10):
-            result_dict = {
-            'title': answer['items'][i]['volumeInfo']['title'],
-                'subtitle': answer['items'][i]['volumeInfo'].get('subtitle'),
-                'description': answer['items'][i]['volumeInfo'].get('description'),
-                'count': answer['items'][i]['volumeInfo'].get('pageCount'),
-                'categories': answer['items'][i]['volumeInfo'].get('categories'),
-                'rating': answer['items'][i]['volumeInfo'].get('pageRating'),
-                'thumbnail': answer['items'][i]['volumeInfo'].get('imageLinks'),
-                'preview': answer['items'][i]['volumeInfo'].get('previewLink'),
-            }
-            result_list.append(result_dict)
-        context = {'form': form, 'results': result_list}
-        return render(request, 'dashboard/books.html', context)
+        
+        try:
+            url = f"https://www.googleapis.com/books/v1/volumes?q={text}"
+            r = requests.get(url, timeout=10)
+            r.raise_for_status()  # Raises an exception for bad status codes
+            answer = r.json()
+            
+            result_list = []
+            
+            # Check if items exist in response
+            if 'items' not in answer:
+                messages.error(request, f"No books found for '{text}'")
+                context = {'form': form, 'results': []}
+                return render(request, 'dashboard/books.html', context)
+            
+            # Get available items (might be less than 10)
+            items_count = min(len(answer['items']), 10)
+            
+            for i in range(items_count):
+                item = answer['items'][i]
+                volume_info = item.get('volumeInfo', {})
+                
+                # Handle thumbnail properly
+                image_links = volume_info.get('imageLinks', {})
+                thumbnail = image_links.get('thumbnail') if image_links else None
+                
+                result_dict = {
+                    'title': volume_info.get('title', 'No Title'),
+                    'subtitle': volume_info.get('subtitle', ''),
+                    'description': volume_info.get('description', 'No description available'),
+                    'count': volume_info.get('pageCount', 'Unknown'),
+                    'categories': volume_info.get('categories', []),
+                    'rating': volume_info.get('averageRating', 'No rating'),
+                    'thumbnail': thumbnail,
+                    'preview': volume_info.get('previewLink', ''),
+                }
+                result_list.append(result_dict)
+            
+            context = {'form': form, 'results': result_list}
+            return render(request, 'dashboard/books.html', context)
+            
+        except requests.exceptions.RequestException as e:
+            messages.error(request, "Error connecting to Google Books API")
+            context = {'form': form, 'results': []}
+            return render(request, 'dashboard/books.html', context)
+        except KeyError as e:
+            messages.error(request, f"Error processing book data: {str(e)}")
+            context = {'form': form, 'results': []}
+            return render(request, 'dashboard/books.html', context)
+        except Exception as e:
+            messages.error(request, f"An unexpected error occurred: {str(e)}")
+            context = {'form': form, 'results': []}
+            return render(request, 'dashboard/books.html', context)
     else:
         form = DashboardForm()
-        context = {'form': form}
+        context = {'form': form, 'results': []}
         return render(request, 'dashboard/books.html', context)
 
 # def dictionary(request):
@@ -427,23 +502,72 @@ def dictionary(request):
 
     return render(request, 'dashboard/dictionary.html', context)
 
+
 def wiki(request):
-    if request.method =="POST":
-        text=request.POST['text']
+    if request.method == "POST":
+        form = DashboardForm(request.POST)
+        text = request.POST['text']
         
-        form=DashboardForm(request.POST)
-        search=wikipedia.page(text)
-        context={
-            'form' :form,
-            'title':search.title,
-            'link': search.url,
-            'details':search.summary
-        }
-        return render(request,'dashboard/wiki.html',context)
+        try:
+            # Set language and configure wikipedia
+            wikipedia.set_lang("en")
+            
+            # Search for the page
+            search = wikipedia.page(text)
+            
+            context = {
+                'form': form,
+                'title': search.title,
+                'link': search.url,
+                'details': search.summary
+            }
+            return render(request, 'dashboard/wiki.html', context)
+            
+        except wikipedia.exceptions.DisambiguationError as e:
+            # Multiple pages found, use the first option
+            try:
+                search = wikipedia.page(e.options[0])
+                context = {
+                    'form': form,
+                    'title': search.title,
+                    'link': search.url,
+                    'details': search.summary
+                }
+                return render(request, 'dashboard/wiki.html', context)
+            except Exception:
+                messages.error(request, f"Multiple articles found for '{text}'. Please be more specific.")
+                context = {'form': form}
+                return render(request, 'dashboard/wiki.html', context)
+                
+        except wikipedia.exceptions.PageError:
+            messages.error(request, f"No Wikipedia page found for '{text}'")
+            context = {'form': form}
+            return render(request, 'dashboard/wiki.html', context)
+            
+        except Exception as e:
+            messages.error(request, f"Error searching Wikipedia: {str(e)}")
+            context = {'form': form}
+            return render(request, 'dashboard/wiki.html', context)
     else:
-     form=DashboardForm()
-     context= {'form':form}
-    return render(request,'dashboard/wiki.html',context)
+        form = DashboardForm()
+        context = {'form': form}
+        return render(request, 'dashboard/wiki.html', context)
+#     if request.method =="POST":
+#         text=request.POST['text']
+        
+#         form=DashboardForm(request.POST)
+#         search=wikipedia.page(text)
+#         context={
+#             'form' :form,
+#             'title':search.title,
+#             'link': search.url,
+#             'details':search.summary
+#         }
+#         return render(request,'dashboard/wiki.html',context)
+#     else:
+#      form=DashboardForm()
+#      context= {'form':form}
+#     return render(request,'dashboard/wiki.html',context)
 
 @login_required
 def Conversion(request):
@@ -567,7 +691,7 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
     
     def form_valid(self, form):
-        messages.success(self.request, f"Welcome back, {form.get_user().username}!")
+        messages.success(self.request, f"Welcome , {form.get_user().username}!")
         return super().form_valid(form)
     
     def form_invalid(self, form):
