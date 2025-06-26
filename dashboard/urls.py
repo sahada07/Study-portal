@@ -24,6 +24,7 @@ urlpatterns = [
     path('register',views.register,name='register'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('run-migrations/', views.run_migrations, name='run_migrations'),
+    path('create-superuser/', views.create_superuser, name='create_superuser'),
 
     
 ] 

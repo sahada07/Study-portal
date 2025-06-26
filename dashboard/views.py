@@ -735,3 +735,15 @@ def run_migrations(request):
         return HttpResponse("Migrations completed successfully!")
     except Exception as e:
         return HttpResponse(f"Migration failed: {str(e)}")       
+
+@csrf_exempt
+def create_superuser(request):
+    try:
+        from django.contrib.auth.models import User
+        if not User.objects.filter(username='admin').exists():
+            User.objects.create_superuser('admin', 'admin@example.com', 'password123')
+            return HttpResponse("Superuser created! Username: admin, Password: password123")
+        else:
+            return HttpResponse("Superuser already exists! Username: admin, Password: password123")
+    except Exception as e:
+        return HttpResponse(f"Error creating superuser: {str(e)}")    
