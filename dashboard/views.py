@@ -1,3 +1,4 @@
+import os
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from . forms import *
@@ -736,14 +737,33 @@ def run_migrations(request):
     except Exception as e:
         return HttpResponse(f"Migration failed: {str(e)}")       
 
+# Add to your dashboard/views.py
+from django.conf import settings
+from django.db import connection
+
 @csrf_exempt
-def create_superuser(request):
+def debug_database(request):
     try:
-        from django.contrib.auth.models import User
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser('admin', 'admin@example.com', 'password123')
-            return HttpResponse("Superuser created! Username: admin, Password: password123")
-        else:
-            return HttpResponse("Superuser already exists! Username: admin, Password: password123")
+        db_config = settings.DATABASES['default']
+        db_name = db_config.get('NAME', 'Unknown')
+        db_engine = db_config.get('ENGINE', 'Unknown')
+        
+        # Test database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            connection_status = "Connected successfully"
+            
+        # Check if we can see users table
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM auth_user")
+            user_count = cursor.fetchone()[0]
+            
+        return HttpResponse(f"""
+        Database Engine: {db_engine}<br>
+        Database Name: {db_name}<br>
+        Connection: {connection_status}<br>
+        User Count: {user_count}<br>
+        Environment DATABASE_URL: {os.environ.get('DATABASE_URL', 'NOT SET')[:50]}...
+        """)
     except Exception as e:
-        return HttpResponse(f"Error creating superuser: {str(e)}")    
+        return HttpResponse(f"Database Error: {str(e)}")
