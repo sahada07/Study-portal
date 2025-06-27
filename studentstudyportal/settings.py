@@ -30,7 +30,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
 # DEBUG = True
 
 DEBUG = os.environ.get('DEBUG', '') != 'False'
-ALLOWED_HOSTS = ['study-portalstudy.onrender.com', '127.0.0.1', 'localhost']
+# ALLOWED_HOSTS = ['student-portalstudy.onrender.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['student-portalstudy.onrender.com', '127.0.0.1', 'localhost']
+
 
 # Application definition
 
@@ -59,7 +61,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'studentstudyportal.urls'
+ROOT_URLCONF = 'student-portalstudy.urls'
 
 TEMPLATES = [
     {
