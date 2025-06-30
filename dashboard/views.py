@@ -763,7 +763,7 @@ def debug_database(request):
         Database Name: {db_name}<br>
         Connection: {connection_status}<br>
         User Count: {user_count}<br>
-        Environment DATABASE_URL: {os.environ.get('postgresql://studentportaldb_user:BD80yvmlYEUiIDbOcmtLMiBrnWaq770j@dpg-d1dui7fgi27c73erbk50-a.oregon-postgres.render.com/studentportaldb', 'NOT SET')[:50]}...
+        Environment DATABASE_URL: {os.environ.get('postgresql://studydb_ybga_user:0Yv4Rx5TeVnJQDXsEd23NDrXWtdQFR5l@dpg-d1h5rv7gi27c73cb0pe0-a.oregon-postgres.render.com/studydb_ybga', 'NOT SET')[:50]}...
         """)
     except Exception as e:
         return HttpResponse(f"Database Error: {str(e)}")
