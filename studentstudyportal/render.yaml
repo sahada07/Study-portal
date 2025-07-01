@@ -28,4 +28,4 @@ services:
       - key: DEBUG
         value: False
       - key: DATABASE_URL
-        value: postgresql://db_beak_user:T2GcghHf4gejEjHnp47uSKcCdEsizXnZ@dpg-d1h6p7mmcj7s73dhfl00-a.oregon-postgres.render.com/db_beak
+        value: postgresql://studydb_ybga_user:0Yv4Rx5TeVnJQDXsEd23NDrXWtdQFR5l@dpg-d1h5rv7gi27c73cb0pe0-a.oregon-postgres.render.com/studydb_ybga
