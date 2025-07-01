@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
-import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -82,11 +81,18 @@ WSGI_APPLICATION = 'studentstudyportal.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+import dj_database_url
+
 DATABASES = {
-    'default': 
-      dj_database_url.parse(os.environ.get('postgresql://studydb_ybga_user:0Yv4Rx5TeVnJQDXsEd23NDrXWtdQFR5l@dpg-d1h5rv7gi27c73cb0pe0-a.oregon-postgres.render.com/studydb_ybga', 'sqlite:///db.sqlite3'))
-    
+    'default': dj_database_url.parse(
+        os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3')
+    )
 }
+# DATABASES = {
+#     'default': 
+#       dj_database_url.parse(os.environ.get('postgresql://db_beak_user:T2GcghHf4gejEjHnp47uSKcCdEsizXnZ@dpg-d1h6p7mmcj7s73dhfl00-a.oregon-postgres.render.com/db_beak', 'sqlite:///db.sqlite3'))
+#     # Temporarily replace your DATABASES setting with this:
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

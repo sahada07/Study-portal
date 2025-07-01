@@ -725,17 +725,9 @@ def profile(request):
 #     return render(request, 'dashboard/logout.html')
      
 
-from django.core.management import call_command
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
-def run_migrations(request):
-    try:
-        call_command('migrate')
-        return HttpResponse("Migrations completed successfully!")
-    except Exception as e:
-        return HttpResponse(f"Migration failed: {str(e)}")       
+    
 
 # Add to your dashboard/views.py
 from django.conf import settings
@@ -763,7 +755,7 @@ def debug_database(request):
         Database Name: {db_name}<br>
         Connection: {connection_status}<br>
         User Count: {user_count}<br>
-        Environment DATABASE_URL: {os.environ.get('postgresql://studydb_ybga_user:0Yv4Rx5TeVnJQDXsEd23NDrXWtdQFR5l@dpg-d1h5rv7gi27c73cb0pe0-a.oregon-postgres.render.com/studydb_ybga', 'NOT SET')[:50]}...
+        Environment DATABASE_URL: {os.environ.get('DATABASE_URL', 'NOT SET')[:50]}...
         """)
     except Exception as e:
         return HttpResponse(f"Database Error: {str(e)}")
