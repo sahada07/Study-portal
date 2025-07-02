@@ -30,9 +30,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-secret-key')
 
 DEBUG = os.environ.get('DEBUG', '') != 'False'
 # ALLOWED_HOSTS = ['study-portalstudy.onrender.com', '127.0.0.1', 'localhost']
-ALLOWED_HOSTS = ['student-portalstudy.onrender.com', 'localhost', '127.0.0.1']
-# Application definition
-
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
